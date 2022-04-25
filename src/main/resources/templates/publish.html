@@ -20,7 +20,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">校园论坛</a>
+            <a class="navbar-brand" href="#">发帖 ~校园论坛</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -49,7 +49,7 @@
             </form>
             <ul class="nav navbar-nav navbar-right">
                 <li th:if="${session.user != null}">
-                    <a href="/publish">发帖</a>
+                    <a href="publish.html">发帖</a>
                 </li>
                 <li class="dropdown" th:if="${session.user != null}">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" th:text="${session.user.getName()}"><span class="caret"></span></a>
@@ -65,28 +65,37 @@
         </div>
     </div>
 </nav>
-<!--主页列表-->
+<!--发帖页面部分-->
 <div class="container-fluid main">
     <div class="row">
         <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
-            <h2><span class="glyphicon glyphicon-list" aria-hidden="true"></span> 帖子</h2>
+            <h2><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>发帖</h2>
             <hr>
-            <div class="media" th:each="post : ${posts}">
-                <div class="media-left">
-                    <a href="#">
-                        <img class="media-object img-rounded" th:src="${post.user.getAvatarUrl()}" alt="...">
-                    </a>
+            <form action="/publish" method="post">
+                <div class="form-group">
+                    <label for="title">主题标题</label>
+                    <input type="text" class="form-control" th:value="${title}" id="title" name="title" placeholder="输入标题...">
                 </div>
-                <div class="media-body">
-                    <h4 class="media-heading" th:text="${post.getTitle()}"></h4>
-                    <span th:text="${post.getDescription()}"></span><br>
-                    <span class="text-desc">
-                        <span th:text="${post.getCommentCount()}"></span>个回复•
-                        <span th:text="${post.getViewCount()}"></span>次浏览•
-                        <span th:text="${#dates.format(post.getGmtCreate(), 'yyyy-MM-dd HH:mm')}"></span>
-                    </span>
+                <div class="form-group">
+                    <label for="description">主题内容</label>
+                    <textarea class="form-control" th:text="${description}" name="description" id="description" cols="30" rows="10"></textarea>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label for="tag">添加标签</label>
+                    <input type="text" class="form-control" th:value="${tag}" id="tag" name="tag" placeholder="输入标签..以,分割">
+                </div>
+                <div class="container-fluid main">
+                    <div class="row">
+                        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                            <div class="alert alert-danger col-lg-12 col-md-12 col-sm-12 col-xs-12" th:if="${error != null}" th:text="${error}">
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                            <button type="submit" class="btn btn-success btn-publish">发布</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
             <h3>论坛发帖指南</h3>
