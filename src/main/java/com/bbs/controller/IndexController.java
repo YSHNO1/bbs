@@ -1,5 +1,6 @@
 package com.bbs.controller;
 
+import com.bbs.dto.PageDto;
 import com.bbs.dto.PostDto;
 import com.bbs.mapper.PostMapper;
 import com.bbs.mapper.UserMapper;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.jws.WebParam;
 import javax.servlet.http.Cookie;
@@ -26,7 +28,9 @@ public class IndexController {
 
     @GetMapping("/")
     public String index(HttpServletRequest request,
-                        Model model){
+                        Model model,
+                        @RequestParam(name = "page", defaultValue = "1") Integer page,
+                        @RequestParam(name = "size", defaultValue = "2") Integer size){
         Cookie[] cookies = request.getCookies();
         if (cookies == null) return "index";
         for (Cookie cookie : cookies){
@@ -39,8 +43,8 @@ public class IndexController {
                 break;
             }
         }
-        List<PostDto> postList = postService.list();
-        model.addAttribute("posts", postList);
+        PageDto pagination = postService.list(page, size);
+        model.addAttribute("pagination", pagination);
         return "index";
     }
 }

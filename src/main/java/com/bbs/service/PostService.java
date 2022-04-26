@@ -1,5 +1,6 @@
 package com.bbs.service;
 
+import com.bbs.dto.PageDto;
 import com.bbs.dto.PostDto;
 import com.bbs.mapper.PostMapper;
 import com.bbs.mapper.UserMapper;
@@ -19,8 +20,14 @@ public class PostService {
     PostMapper postMapper;
     @Autowired
     UserMapper userMapper;
-    public List<PostDto> list() {
-        List<Post> posts = postMapper.list();
+    public PageDto list(Integer page, Integer size) {
+        PageDto  pageDto = new PageDto();
+        Integer totalCount = postMapper.count();  //记录总数
+        pageDto.setPage(totalCount, page, size);
+        if(page < 1) page = 1;
+        if(page > pageDto.getTotalPage()) page = pageDto.getTotalPage();
+        Integer offset = size * (page - 1);
+        List<Post> posts = postMapper.list(offset, size);
         List<PostDto> postDtoList = new ArrayList<>();
         for(Post post : posts){
             User user = userMapper.findById(post.getCreator());
@@ -30,6 +37,7 @@ public class PostService {
             postDto.setUser(user);
             postDtoList.add(postDto);
         }
-        return postDtoList;
+        pageDto.setPosts(postDtoList);
+        return pageDto;
     }
 }
