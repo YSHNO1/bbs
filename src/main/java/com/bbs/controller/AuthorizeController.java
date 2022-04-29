@@ -5,6 +5,7 @@ import com.bbs.dto.GithubUser;
 import com.bbs.model.User;
 import com.bbs.provider.GithubProvider;
 import com.bbs.mapper.UserMapper;
+import com.bbs.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -31,7 +32,7 @@ public class AuthorizeController {
     private String redirectUri;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
@@ -54,10 +55,9 @@ public class AuthorizeController {
             user.setToken(token);
             user.setAccountId(String.valueOf(githubUser.getId()));
             user.setName(githubUser.getName());
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
             user.setAvatarUrl(githubUser.getAvatarUrl());
-            userMapper.insert(user);  //将用户的登录信息保存到数据库
+            //先判断数据库中是否有用户信息,如果有则更新token,无则加入数据库
+            userService.createOrUpdate(user);
             response.addCookie(new Cookie("token", token)); //使用数据库的信息来保存用户登录状态
             //登录成功，写cookie和session
             //request.getSession().setAttribute("user", githubUser);
@@ -66,5 +66,16 @@ public class AuthorizeController {
             //登录失败,重新登录
             return "redirect:/";
         }
+    }
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request,
+                         HttpServletResponse response){
+        //退出登录，移除session和cookie
+        request.getSession().removeAttribute("user");
+        //移除cookie，新建一个同名的null将其覆盖
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return "redirect:/";
     }
 }
